@@ -475,18 +475,24 @@ async function sendTicketEmail(test){
   try{
     const c=await makeTicketImage();
     const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.88));
-    const fd=new FormData();
-    fd.append('_subject',test?'🧪 Deneme bileti (Davet sitesi)':'💖 Yeni randevu bileti geldi!');
-    fd.append('_template','table');fd.append('_captcha','false');
-    fd.append('Etkinlik',(state.actEmoji||'')+' '+(state.act||'-'));
-    fd.append('Gün',state.dayLabel||'-');fd.append('Saat',state.time||'-');fd.append('Hesap',state.pay||'-');
-    fd.append('Puan',String(state.score));fd.append('Kaçan Hayır',String(state.noTries));
-    fd.append('Rozetler',state.badges.map(k=>BADGES[k].join(' ')).join(', ')||'-');
-    fd.append('Kalp oyunu süresi',state.heartTime?state.heartTime.toFixed(1)+' sn':'-');
-    fd.append('attachment',new File([blob],'randevu-bileti.jpg',{type:'image/jpeg'}));
-    const res=await fetch('https://formsubmit.co/ajax/'+MAIL_TO,{method:'POST',headers:{'Accept':'application/json'},body:fd});
-    const j=await res.json().catch(()=>({}));
-    return {ok:res.ok&&String(j.success)!=='false',msg:j.message||res.status};
+    const fields={_subject:test?'🧪 Deneme bileti (Davet sitesi)':'💖 Yeni randevu bileti geldi!',_template:'table',_captcha:'false',
+      'Etkinlik':(state.actEmoji||'')+' '+(state.act||'-'),'Gün':state.dayLabel||'-','Saat':state.time||'-','Hesap':state.pay||'-',
+      'Puan':String(state.score),'Kaçan Hayır':String(state.noTries),
+      'Rozetler':state.badges.map(k=>BADGES[k].join(' ')).join(', ')||'-',
+      'Kalp oyunu süresi':state.heartTime?state.heartTime.toFixed(1)+' sn':'-'};
+    // Klasik multipart form + gizli iframe: FormSubmit ekleri bu yolla iletiyor
+    const name='mf'+Date.now();
+    const ifr=document.createElement('iframe');ifr.name=name;ifr.style.display='none';document.body.appendChild(ifr);
+    const f=document.createElement('form');f.method='POST';f.action='https://formsubmit.co/'+MAIL_TO;f.enctype='multipart/form-data';
+    f.target=name;f.style.display='none';
+    for(const [k,v] of Object.entries(fields)){const i=document.createElement('input');i.type='hidden';i.name=k;i.value=v;f.appendChild(i);}
+    const fi=document.createElement('input');fi.type='file';fi.name='attachment';
+    const dt=new DataTransfer();dt.items.add(new File([blob],'randevu-bileti.jpg',{type:'image/jpeg'}));fi.files=dt.files;f.appendChild(fi);
+    document.body.appendChild(f);
+    const done=new Promise(r=>{ifr.addEventListener('load',()=>r(true),{once:true});setTimeout(()=>r(false),15000);});
+    f.submit();
+    const ok=await done;setTimeout(()=>{f.remove();ifr.remove();},2000);
+    return {ok,msg:ok?'gönderildi':'zaman aşımı'};
   }catch(e){return {ok:false,msg:String(e)};}
 }
 if(location.hash==='#mailtest'){
