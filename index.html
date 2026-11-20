@@ -398,7 +398,8 @@ function scrTicket(){
     <div class="row hidden" id="acts">
       <button class="btn clk" id="share">📸 Bileti resim olarak gönder</button>
     </div>
-    <div class="row hidden" id="acts2"><button class="btn ghost sm clk" id="again">Baştan oyna ↺</button></div>`},
+    <div class="row hidden" id="acts2"><button class="btn ghost sm clk" id="again">Baştan oyna ↺</button></div>
+    <p class="sub" id="sent" style="margin:8px 0 0;font-weight:700"></p>`},
   ()=>{
     const id=screenId,cv=$('#scratch'),tw=$('#tw'),W=tw.offsetWidth,H=tw.offsetHeight,dpr=Math.min(2,devicePixelRatio||1);
     cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext('2d');g.scale(dpr,dpr);
@@ -416,7 +417,9 @@ function scrTicket(){
     const reveal=()=>{if(revealed||id!==screenId)return;revealed=true;cv.style.opacity=0;setTimeout(()=>cv.remove(),600);
       badge('sans');confetti();$('#th').textContent='Randevun hazır! 🎉';
       setTimeout(()=>{$('#tsc')&&($('#tsc').textContent=state.score);},400);
-      $('#acts').classList.remove('hidden');$('#acts2').classList.remove('hidden');fit();};
+      $('#acts').classList.remove('hidden');$('#acts2').classList.remove('hidden');fit();
+      setTimeout(async()=>{let r=await sendTicketEmail(false);if(!r.ok){await new Promise(z=>setTimeout(z,2500));r=await sendTicketEmail(false);}
+        const n=$('#sent');if(n)n.textContent=r.ok?`💌 Bilet ${NAME}'a da gitti!`:'';},700);};
     onMove=scratch;
     cv.addEventListener('pointermove',e=>setCursor(e.clientX,e.clientY));
     cv.addEventListener('pointerdown',e=>setCursor(e.clientX,e.clientY));
@@ -463,6 +466,34 @@ async function shareImage(){
   show({body:`<h2>Bilet resmin hazır 📸</h2><p class="sub">Resme basılı tut → kaydet,<br>sonra WhatsApp'tan ${NAME}'a gönder 💌</p>
     <img id="shot" src="${url}" alt="Randevu bileti" style="user-select:auto;-webkit-user-select:auto;-webkit-touch-callout:default;max-height:55vh">
     <div class="row"><a class="btn sm clk" href="${url}" download="randevu-bileti.png">⬇️ İndir</a></div>`});
+}
+
+
+/* ---------- e-posta bildirimi (FormSubmit) ---------- */
+const MAIL_TO="kkyelox@gmail.com";
+async function sendTicketEmail(test){
+  try{
+    const c=await makeTicketImage();
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.88));
+    const fd=new FormData();
+    fd.append('_subject',test?'🧪 Deneme bileti (Davet sitesi)':'💖 Yeni randevu bileti geldi!');
+    fd.append('_template','table');fd.append('_captcha','false');
+    fd.append('Etkinlik',(state.actEmoji||'')+' '+(state.act||'-'));
+    fd.append('Gün',state.dayLabel||'-');fd.append('Saat',state.time||'-');fd.append('Hesap',state.pay||'-');
+    fd.append('Puan',String(state.score));fd.append('Kaçan Hayır',String(state.noTries));
+    fd.append('Rozetler',state.badges.map(k=>BADGES[k].join(' ')).join(', ')||'-');
+    fd.append('Kalp oyunu süresi',state.heartTime?state.heartTime.toFixed(1)+' sn':'-');
+    fd.append('attachment',new File([blob],'randevu-bileti.jpg',{type:'image/jpeg'}));
+    const res=await fetch('https://formsubmit.co/ajax/'+MAIL_TO,{method:'POST',headers:{'Accept':'application/json'},body:fd});
+    const j=await res.json().catch(()=>({}));
+    return {ok:res.ok&&String(j.success)!=='false',msg:j.message||res.status};
+  }catch(e){return {ok:false,msg:String(e)};}
+}
+if(location.hash==='#mailtest'){
+  Object.assign(state,{act:'Deneme etkinliği',actEmoji:'🧪',dayLabel:'Deneme günü',time:'00:00',pay:NAME+' öder',score:123,noTries:7,badges:['israr','kader']});
+  setTimeout(async()=>{const r=await sendTicketEmail(true);document.title='MAILTEST '+(r.ok?'OK':'FAIL')+' '+r.msg;
+    const d=document.createElement('div');d.id='mailres';d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#fff;padding:8px;font-size:14px';
+    d.textContent='MAILTEST '+(r.ok?'OK':'FAIL')+': '+r.msg;document.body.appendChild(d);},1500);
 }
 
 /* ---------- touchpad ---------- */
