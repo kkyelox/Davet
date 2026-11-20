@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Sana bir sorum var 💌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#ff4f8b; --pink2:#ff8fb3; --peach:#ffd3c4; --ink:#3a1530; --cream:#fff6f1;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+  html,body{margin:0;height:100%;overflow:hidden;font-family:'Baloo 2',system-ui,sans-serif;color:var(--ink)}
+  body{
+    display:flex;flex-direction:column;height:100dvh;
+    background:radial-gradient(120% 80% at 20% 0%,#ffe6ef 0%,#ffd0de 45%,#ffc2b0 100%);
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  }
+  /* floating hearts background */
+  .bgh{position:fixed;font-size:22px;opacity:.25;animation:float linear infinite;pointer-events:none;z-index:0}
+  @keyframes float{from{transform:translateY(110vh) rotate(0)}to{transform:translateY(-15vh) rotate(360deg)}}
+
+  #stage{position:relative;flex:1;min-height:0;z-index:1;overflow:hidden}
+  @media (hover:hover) and (pointer:fine){ #stage, #stage *{cursor:none!important} }
+  .scr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+       padding:18px 18px 10px;text-align:center;animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes pop{from{opacity:0;transform:scale(.9) translateY(10px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(26px,7.4vw,42px);line-height:1.08;margin:0 0 6px;font-weight:800}
+  h2{font-size:clamp(20px,5.6vw,30px);margin:0 0 10px;font-weight:800}
+  .sub{font-size:16px;opacity:.75;margin:0 0 14px;min-height:24px;font-weight:500}
+  .big-emoji{font-size:84px;line-height:1;margin-bottom:6px;animation:bob 2s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-8px) rotate(-4deg)}}
+
+  .btn{border:0;border-radius:999px;font-family:inherit;font-weight:800;color:#fff;
+       background:linear-gradient(135deg,var(--pink),#ff7a59);padding:12px 28px;font-size:20px;
+       box-shadow:0 6px 0 #c8346a,0 10px 24px rgba(200,52,106,.35);transition:transform .15s,filter .15s}
+  .btn.hov{filter:brightness(1.1);transform:translateY(-2px) scale(1.04)}
+  .btn.off{filter:grayscale(.7) opacity(.6)}
+  .btn.ghost{background:#fff;color:var(--pink);box-shadow:0 5px 0 #f3b3c8}
+
+  #yes{font-size:clamp(46px,14vw,72px);padding:10px 46px;transition:transform .35s cubic-bezier(.2,1.6,.4,1),filter .15s;
+       animation:glow 1.6s ease-in-out infinite}
+  @keyframes glow{50%{box-shadow:0 6px 0 #c8346a,0 10px 40px rgba(255,79,139,.75)}}
+  #yes.hov{filter:brightness(1.1)}
+  .runaway{position:absolute;border:2px solid #d9a2b4;background:#fff;color:#8a5a6c;border-radius:999px;
+       font-family:inherit;font-weight:700;font-size:15px;padding:6px 14px;white-space:nowrap;
+       transition:left .38s cubic-bezier(.3,1.5,.5,1),top .38s cubic-bezier(.3,1.5,.5,1),font-size .3s,transform .3s;
+       transform:rotate(var(--rot,0deg))}
+  .runaway.wig{animation:wig .4s}
+  @keyframes wig{25%{transform:rotate(-12deg) scale(1.1)}75%{transform:rotate(10deg) scale(.95)}}
+
+  .grid{display:grid;gap:10px;width:100%;max-width:440px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .card{background:#fff;border:3px solid transparent;border-radius:18px;padding:10px 6px;font-family:inherit;
+        font-weight:700;font-size:15px;color:var(--ink);box-shadow:0 4px 0 #f1b7c9;transition:transform .15s,border-color .15s,background .15s}
+  .card .e{font-size:30px;display:block;line-height:1.2}
+  .card.hov{transform:translateY(-2px) scale(1.03)}
+  .card.sel{border-color:#c8346a;background:var(--pink);color:#fff;transform:scale(1.05);box-shadow:0 4px 0 #c8346a}
+  .chip{padding:7px 2px;font-size:13px;border-radius:14px;line-height:1.1}
+  .chip b{display:block;font-size:19px}
+  .lbl{font-weight:800;margin:10px 0 6px;font-size:16px;opacity:.8}
+  .row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+
+  /* ticket */
+  .ticket{background:#fff;border-radius:22px;width:100%;max-width:360px;padding:16px 18px;text-align:left;
+          box-shadow:0 12px 30px rgba(160,40,80,.25);position:relative;animation:tilt 3s ease-in-out infinite}
+  @keyframes tilt{50%{transform:rotate(-1.2deg)}}
+  .ticket .top{font-weight:800;color:var(--pink);font-size:13px;letter-spacing:2px}
+  .ticket .ttl{font-size:24px;font-weight:800;margin:2px 0 8px}
+  .ticket .ln{display:flex;gap:8px;font-size:17px;margin:3px 0}
+  .ticket .cut{border-top:2px dashed #f2bfd0;margin:10px -18px 8px}
+  .ticket .bar{height:30px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 9px);opacity:.8;border-radius:3px}
+  .ticket .small{font-size:12px;opacity:.6;margin-top:4px}
+
+  /* pad */
+  #padWrap{position:relative;z-index:2;padding:8px 12px calc(10px + env(safe-area-inset-bottom));
+           background:linear-gradient(180deg,rgba(255,255,255,0),rgba(58,21,48,.08))}
+  #pad{height:min(32dvh,260px);min-height:150px;border-radius:22px;touch-action:none;position:relative;overflow:hidden;
+       background:
+         radial-gradient(circle,rgba(255,255,255,.18) 1.2px,transparent 1.5px) 0 0/18px 18px,
+         linear-gradient(160deg,#4a1d3f,#2c0f26);
+       box-shadow:inset 0 2px 8px rgba(0,0,0,.4),0 6px 18px rgba(58,21,48,.35);
+       display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffd6e4}
+  #pad .hint{font-size:18px;font-weight:700;opacity:.9;text-align:center;pointer-events:none;transition:opacity .4s}
+  #pad .hint small{display:block;font-size:13px;opacity:.7;font-weight:500}
+  #pad.pulse{animation:padpulse 1.4s ease-in-out infinite}
+  @keyframes padpulse{50%{box-shadow:inset 0 2px 8px rgba(0,0,0,.4),0 0 0 6px rgba(255,79,139,.45)}}
+  #pad .finger{position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,143,179,.35);
+       border:2px solid rgba(255,214,228,.6);left:0;top:0;will-change:transform;pointer-events:none;opacity:0;transition:opacity .2s}
+  #clickBar{display:flex;gap:8px;margin-top:8px}
+  #clickBar button{flex:1;height:42px;border-radius:14px;border:0;font-family:inherit;font-weight:800;font-size:16px;
+       background:#3b1533;color:#ffd6e4;box-shadow:0 4px 0 #1d0819;touch-action:manipulation}
+  #clickBar button:active{transform:translateY(3px);box-shadow:0 1px 0 #1d0819}
+
+  #cursor{position:fixed;left:0;top:0;width:30px;height:30px;z-index:50;pointer-events:none;
+          filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));will-change:transform;transition:none}
+  .ripple{position:fixed;width:16px;height:16px;border-radius:50%;border:3px solid var(--pink);z-index:49;
+          pointer-events:none;transform:translate(-50%,-50%);animation:rip .5s ease-out forwards}
+  @keyframes rip{to{width:60px;height:60px;opacity:0}}
+
+  #toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translate(-50%,-140%);z-index:60;
+         background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-weight:700;font-size:15px;
+         transition:transform .35s cubic-bezier(.2,1.5,.4,1);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+  #toast.show{transform:translate(-50%,0)}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:40}
+  .steps{position:absolute;top:10px;left:0;right:0;display:flex;justify-content:center;gap:6px}
+  .steps i{width:8px;height:8px;border-radius:50%;background:rgba(58,21,48,.2)}
+  .steps i.on{background:var(--pink);width:22px;border-radius:5px}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="padWrap">
+  <div id="pad" class="pulse">
+    <div class="hint" id="hint">👆 Fareyi buradan sürükle<small>Dokun = tıkla</small></div>
+    <div class="finger" id="finger"></div>
+  </div>
+  <div id="clickBar"><button id="lclick">Tıkla</button><button id="rclick">Tıkla</button></div>
+</div>
+
+<svg id="cursor" viewBox="0 0 30 30"><path d="M3 2 L3 24 L9 18.5 L13 27 L17 25.2 L13 16.8 L21 16.8 Z" fill="#fff" stroke="#3a1530" stroke-width="2" stroke-linejoin="round"/></svg>
+<div id="toast"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+const NAME = "Murat"; // davet edenin adı
+
+const stage = document.getElementById('stage');
+const pad = document.getElementById('pad');
+const cursorEl = document.getElementById('cursor');
+const finger = document.getElementById('finger');
+const hint = document.getElementById('hint');
+
+const state = { act:null, actEmoji:'', day:null, dayLabel:'', time:null, noTries:0, pay:null };
+let cx = 0, cy = 0;          // virtual cursor (viewport coords)
+let runaways = [];           // fleeing buttons on current screen
+let hovered = null;
+
+/* ---------- background hearts ---------- */
+['💖','💕','💗','✨','💘','🌸'].forEach((h,i)=>{
+  for(let k=0;k<2;k++){
+    const s=document.createElement('div');s.className='bgh';s.textContent=h;
+    s.style.left=(Math.random()*95)+'vw';s.style.animationDuration=(12+Math.random()*14)+'s';
+    s.style.animationDelay=(-Math.random()*20)+'s';document.body.appendChild(s);
+  }
+});
+
+/* ---------- helpers ---------- */
+function toast(t, ms=1800){
+  const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');
+  clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),ms);
+}
+let _sr=null;function stageRect(){ return _sr||(_sr=stage.getBoundingClientRect()); }
+addEventListener('resize',()=>_sr=null);
+function setCursor(x,y){
+  const r=stageRect();
+  cx=Math.max(r.left+2,Math.min(r.right-6,x));
+  cy=Math.max(r.top+2,Math.min(r.bottom-6,y));
+  cursorEl.style.transform=`translate3d(${cx}px,${cy}px,0)`;
+  checkRunaways();
+  if(!setCursor._q){ setCursor._q=true; requestAnimationFrame(()=>{ setCursor._q=false; updateHover(); }); }
+}
+function targetAt(x,y){
+  const el=document.elementFromPoint(x,y);
+  return el ? el.closest('.clk') : null;
+}
+function updateHover(){
+  const t=targetAt(cx,cy);
+  if(t!==hovered){ hovered&&hovered.classList.remove('hov'); hovered=t; t&&t.classList.add('hov'); }
+}
+function ripple(x,y){
+  const d=document.createElement('div');d.className='ripple';d.style.left=x+'px';d.style.top=y+'px';
+  document.body.appendChild(d);setTimeout(()=>d.remove(),550);
+}
+function vclick(){
+  ripple(cx+3,cy+3);
+  const t=targetAt(cx+2,cy+2);
+  if(!t) return;
+  const r=runaways.find(o=>o.el===t);
+  if(r){ flee(r,true); return; }
+  t.click();
+}
+
+/* ---------- runaway buttons ---------- */
+function addRunaway(el,msgs,onFlee){
+  const o={el,msgs,n:0,onFlee,x:0,y:0};
+  runaways.push(o);
+  el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();flee(o,true);});
+  el.addEventListener('click',e=>{e.preventDefault();flee(o,true);});
+  return o;
+}
+function placeRunaway(o,x,y){
+  o.x=x;o.y=y;o.el.style.left=x+'px';o.el.style.top=y+'px';
+}
+function checkRunaways(){
+  const sr=stageRect();
+  for(const o of runaways){
+    const w=o.w||(o.w=o.el.offsetWidth),h=o.h||(o.h=o.el.offsetHeight);
+    const px=cx-sr.left, py=cy-sr.top, m=46;
+    if(px>o.x-m && px<o.x+w+m && py>o.y-m && py<o.y+h+m) flee(o,false);
+  }
+}
+function flee(o,direct){
+  const now=performance.now();
+  if(o._last && now-o._last<120) return;
+  o._last=now;
+  o.n++; state.noTries++;
+  o.el.textContent=o.msgs[Math.min(o.n,o.msgs.length-1)];
+  o.w=0;o.h=0;
+  const sr=stageRect(), W=sr.width, H=sr.height;
+  const w=o.el.offsetWidth, h=o.el.offsetHeight, p=12;
+  const px=cx-sr.left, py=cy-sr.top;
+  const avoid=[...document.querySelectorAll('.avoid')].map(e=>{const r=e.getBoundingClientRect();return {l:r.left-sr.left-10,t:r.top-sr.top-10,r:r.right-sr.left+10,b:r.bottom-sr.top+10};});
+  let best=null,bestD=-1;
+  for(let i=0;i<60;i++){
+    const x=p+Math.random()*Math.max(1,W-w-2*p), y=p+30+Math.random()*Math.max(1,H-h-2*p-30);
+    const overlap=avoid.some(a=>x<a.r&&x+w>a.l&&y<a.b&&y+h>a.t);
+    if(overlap) continue;
+    const d=Math.hypot(x+w/2-px,y+h/2-py);
+    if(d>bestD){bestD=d;best={x,y};}
+    if(d>190 && Math.random()<.5) break;
+  }
+  if(best) placeRunaway(o,best.x,best.y);
+  o.el.style.setProperty('--rot',(Math.random()*24-12)+'deg');
+  o.el.classList.remove('wig');void o.el.offsetWidth;o.el.classList.add('wig');
+  if(navigator.vibrate) try{navigator.vibrate(25)}catch(e){}
+  o.onFlee&&o.onFlee(o);
+}
+
+/* ---------- screens ---------- */
+function steps(i){return `<div class="steps">${[0,1,2,3,4].map(k=>`<i class="${k===i?'on':''}"></i>`).join('')}</div>`;}
+function show(html,after){
+  runaways=[];hovered=null;
+  stage.innerHTML=`<div class="scr">${html}</div>`;
+  requestAnimationFrame(()=>{after&&after(stage.firstElementChild);updateHover();});
+}
+function $(s){return stage.querySelector(s);}
+
+function scrIntro(){
+  show(`
+    <div class="big-emoji">💌</div>
+    <h1>Sana küçük bir<br>sorum var…</h1>
+    <p class="sub">Aşağıdaki pad'den imleci sürükle,<br>zarfın üstüne getir ve dokun 👇</p>
+    <button class="btn clk" id="open">Zarfı aç ✉️</button>
+  `,()=>{ $('#open').onclick=()=>{ pad.classList.remove('pulse'); scrQuestion(); }; });
+}
+
+const noMsgs=["Hayır","Emin misin? 🤨","Son kararın mı?","Bir daha düşün 🥺","Kalbimi kırıyorsun 💔",
+  "Yanlış butona gidiyorsun","Bu buton bozuk galiba 🔧","Evet daha güzel duruyor 👉","Hadi ama 😭",
+  "Pes etmiyorsun ha 😤","Yakalayamazsın 🏃‍♀️","Ben kaçarım 💨","Sonsuza kadar kaçarım","Evet'e bas artık 🙏","😶"];
+const subMsgs=["","Hmm, ilginç bir seçim 🤔","O buton biraz utangaç","Bak Evet ne kadar büyüdü 👀",
+  "Hayır butonu tatile çıktı 🏖️","Bu oyunu kazanamazsın 😌","Evet seni bekliyor 💖","Tek yol var, biliyorsun 😇"];
+
+function scrQuestion(){
+  show(`
+    ${steps(0)}
+    <h1>Benimle bir etkinlik<br>yapmak ister misin? 🥰</h1>
+    <p class="sub" id="qsub">Dikkatli seç…</p>
+    <button class="btn clk avoid" id="yes">EVET</button>
+    <button class="runaway clk" id="no">Hayır</button>
+  `,scr=>{
+    const yes=$('#yes'), no=$('#no');
+    yes.onclick=scrYay;
+    const sr=stageRect(), yr=yes.getBoundingClientRect();
+    const o=addRunaway(no,noMsgs,o=>{
+      const s=Math.min(1+o.n*0.07,1.6);
+      yes.style.transform=`scale(${s})`;
+      $('#qsub').textContent=subMsgs[Math.min(Math.floor(o.n/2),subMsgs.length-1)]||"Dikkatli seç…";
+      if(o.n>=14){no.style.fontSize='11px';}
+    });
+    placeRunaway(o, (yr.left+yr.width/2-sr.left)-no.offsetWidth/2, yr.bottom-sr.top+26);
+  });
+}
+
+function scrYay(){
+  confetti();
+  const tries=state.noTries;
+  show(`
+    <div class="big-emoji">🥳</div>
+    <h1>YAAAY!<br>Biliyordum 😌💖</h1>
+    <p class="sub">${tries?`Hayır'ı ${tries} kez yakalamaya çalıştın ama olmadı 😂`:"Hiç tereddüt etmedin, bayıldım 😍"}<br>Şimdi detayları ayarlayalım!</p>
+    <button class="btn clk" id="go">Hadi! →</button>
+  `,()=>{ $('#go').onclick=scrActivity; });
+}
+
+const acts=[["🎬","Sinema"],["🍝","Akşam yemeği"],["☕","Kahve & tatlı"],["🎳","Bowling"],["🌅","Sahilde yürüyüş"],["🎲","Sürpriz! ("+NAME+" seçsin)"]];
+function scrActivity(){
+  show(`
+    ${steps(1)}
+    <h2>Ne yapalım? 🤔</h2>
+    <div class="grid g2">${acts.map((a,i)=>`<button class="card clk" data-i="${i}"><span class="e">${a[0]}</span>${a[1]}</button>`).join('')}</div>
+    <div class="row"><button class="btn clk off" id="next">Devam →</button></div>
+  `,()=>{
+    stage.querySelectorAll('.card').forEach(c=>c.onclick=()=>{
+      stage.querySelectorAll('.card').forEach(x=>x.classList.remove('sel'));
+      c.classList.add('sel');const a=acts[+c.dataset.i];state.act=a[1];state.actEmoji=a[0];
+      $('#next').classList.remove('off');
+      const lines={0:"Patlamış mısır benden 🍿",1:"Acıktım bile 😋",2:"Tatlı seçimi sende 🍰",3:"Kaybeden dondurma ısmarlar 🍦",4:"Gün batımı ayarlandı 🌇",5:"Cesursun 😏"};
+      toast(lines[c.dataset.i]);
+    });
+    $('#next').onclick=()=>{ if(!state.act){toast("Önce bir şey seç 👀");return;} scrDate(); };
+  });
+}
+
+function scrDate(){
+  const days=[];const now=new Date();
+  for(let i=0;i<12;i++){const d=new Date(now);d.setDate(now.getDate()+i);days.push(d);}
+  const times=["12:00","14:00","16:00","18:00","19:30","21:00"];
+  show(`
+    ${steps(2)}
+    <h2>Ne zaman? 📅</h2>
+    <div class="grid g4" id="days">${days.map((d,i)=>{
+      const wd=i===0?"Bugün":i===1?"Yarın":d.toLocaleDateString('tr-TR',{weekday:'short'});
+      return `<button class="card chip clk" data-i="${i}"><b>${d.getDate()}</b>${wd}</button>`;}).join('')}</div>
+    <div class="lbl">Saat kaçta? ⏰</div>
+    <div class="grid g3" id="times">${times.map(t=>`<button class="card chip clk" data-t="${t}"><b style="font-size:17px">${t}</b></button>`).join('')}</div>
+    <div class="row"><button class="btn clk off" id="next">Devam →</button></div>
+  `,()=>{
+    const upd=()=>{ if(state.day!==null&&state.time) $('#next').classList.remove('off'); };
+    stage.querySelectorAll('#days .card').forEach(c=>c.onclick=()=>{
+      stage.querySelectorAll('#days .card').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');
+      const i=+c.dataset.i;state.day=i;
+      state.dayLabel=days[i].toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
+      toast(i===0?"Bugün mü?! Hazırlanıyorum 🏃‍♂️":i===1?"Yarın! Heyecanlandım 🤩":i>7?"Bu kadar bekleyemem ama tamam 😅":"Takvime yazıldı ✍️");
+      upd();
+    });
+    stage.querySelectorAll('#times .card').forEach(c=>c.onclick=()=>{
+      stage.querySelectorAll('#times .card').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');
+      state.time=c.dataset.t;
+      toast(state.time==="21:00"?"Gece kuşu 🦉":state.time==="12:00"?"Öğle randevusu ☀️":"Mükemmel saat 👌");
+      upd();
+    });
+    $('#next').onclick=()=>{ if(state.day===null||!state.time){toast("Gün ve saati seç 👀");return;} scrPay(); };
+  });
+}
+
+function scrPay(){
+  show(`
+    ${steps(3)}
+    <div class="big-emoji">💸</div>
+    <h2>Son soru:<br>Hesabı kim öder?</h2>
+    <p class="sub">Dürüst ol 😇</p>
+    <div class="row avoid" style="flex-direction:column;align-items:center">
+      <button class="btn clk" id="p1">${NAME} öder 😎</button>
+      <button class="btn ghost clk" id="p2">${NAME} öder, tatlı benden 🍰</button>
+    </div>
+    <button class="runaway clk" id="p3">Ben öderim</button>
+  `,()=>{
+    $('#p1').onclick=()=>{state.pay=NAME+" öder";scrTicket();};
+    $('#p2').onclick=()=>{state.pay=NAME+" öder, tatlı senden";scrTicket();};
+    const sr=stageRect(), r=$('.row.avoid').getBoundingClientRect(), p3=$('#p3');
+    const o=addRunaway(p3,["Ben öderim","Olmaz öyle şey 🙅‍♂️","Hiç zahmet etme","Cüzdanını sakla 👛","Asla 😤","Hayatta olmaz"]);
+    placeRunaway(o,(r.left+r.width/2-sr.left)-p3.offsetWidth/2, r.bottom-sr.top+20);
+  });
+}
+
+function summaryText(){
+  return `Randevumuz onaylandı 💖\n${state.actEmoji} ${state.act}\n📅 ${state.dayLabel}\n⏰ ${state.time}\n💸 ${state.pay}\n(Hayır'a ${state.noTries} kez basmaya çalıştım ama kaçtı 😅)`;
+}
+function scrTicket(){
+  confetti();
+  const wa="https://wa.me/?text="+encodeURIComponent(summaryText());
+  show(`
+    ${steps(4)}
+    <div class="ticket">
+      <div class="top">✦ RANDEVU BİLETİ ✦</div>
+      <div class="ttl">Onaylandı! 💖</div>
+      <div class="ln">${state.actEmoji} <span>${state.act}</span></div>
+      <div class="ln">📅 <span>${state.dayLabel}</span></div>
+      <div class="ln">⏰ <span>${state.time}</span></div>
+      <div class="ln">💸 <span>${state.pay}</span></div>
+      <div class="cut"></div>
+      <div class="bar"></div>
+      <div class="small">Kaçan "Hayır" sayısı: ${state.noTries} 😂 · İade ve iptal yoktur.</div>
+    </div>
+    <div class="row">
+      <a class="btn clk" id="wa" href="${wa}" target="_blank" rel="noopener" style="text-decoration:none">WhatsApp'tan ${NAME}'a gönder 💬</a>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn ghost clk" id="copy" style="font-size:16px;padding:8px 18px">Kopyala 📋</button>
+      <button class="btn ghost clk" id="again" style="font-size:16px;padding:8px 18px">Baştan ↺</button>
+    </div>
+  `,()=>{
+    $('#copy').onclick=async()=>{
+      try{await navigator.clipboard.writeText(summaryText());toast("Kopyalandı! "+NAME+"'a yapıştır 💌");}
+      catch(e){toast("Kopyalanamadı, ekran görüntüsü al 📸");}
+    };
+    $('#again').onclick=()=>{Object.assign(state,{act:null,day:null,time:null,noTries:0,pay:null});scrIntro();};
+  });
+}
+
+/* ---------- touchpad ---------- */
+let pid=null,lx=0,ly=0,sx=0,sy=0,st=0,moved=0;
+pad.addEventListener('pointerdown',e=>{
+  e.preventDefault();pad.setPointerCapture(e.pointerId);
+  pid=e.pointerId;lx=sx=e.clientX;ly=sy=e.clientY;st=performance.now();moved=0;
+  padRect=pad.getBoundingClientRect();finger.style.transform=`translate3d(${e.clientX-padRect.left-22}px,${e.clientY-padRect.top-22}px,0)`;finger.style.opacity=1;
+  hint.style.opacity=.25;
+});
+let padRect=null;
+function padMove(e){
+  if(e.pointerId!==pid) return;
+  const evs=(e.getCoalescedEvents&&e.getCoalescedEvents().length)?e.getCoalescedEvents():[e];
+  let nx=cx, ny=cy;
+  for(const ev of evs){
+    const dx=ev.clientX-lx, dy=ev.clientY-ly; lx=ev.clientX; ly=ev.clientY;
+    moved+=Math.abs(dx)+Math.abs(dy);
+    const k=1.6+Math.min(Math.hypot(dx,dy)/10,1.4);
+    nx+=dx*k; ny+=dy*k;
+  }
+  setCursor(nx,ny);
+  padRect=padRect||pad.getBoundingClientRect();
+  finger.style.transform=`translate3d(${e.clientX-padRect.left-22}px,${e.clientY-padRect.top-22}px,0)`;
+}
+pad.addEventListener('pointermove',padMove);
+addEventListener('resize',()=>padRect=null);
+function endPad(e){
+  if(e.pointerId!==pid) return;
+  pid=null;finger.style.opacity=0;hint.style.opacity=.9;
+  if(moved<10 && performance.now()-st<300) vclick();
+}
+pad.addEventListener('pointerup',endPad);
+pad.addEventListener('pointercancel',e=>{if(e.pointerId===pid){pid=null;finger.style.opacity=0;hint.style.opacity=.9;}});
+['lclick','rclick'].forEach(id=>document.getElementById(id).addEventListener('click',vclick));
+
+/* desktop mouse also drives the cursor */
+stage.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse') setCursor(e.clientX,e.clientY); });
+document.addEventListener('touchmove',e=>{ if(!e.target.closest('#pad')) e.preventDefault(); },{passive:false});
+
+/* ---------- confetti ---------- */
+const cv=document.getElementById('confetti'),cx2=cv.getContext('2d');let parts=[],raf=null;
+function resize(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;}
+resize();addEventListener('resize',()=>{resize();});
+function confetti(){
+  const cols=['#ff4f8b','#ff8fb3','#ffd166','#7bdff2','#b892ff','#ff7a59'];
+  for(let i=0;i<160;i++) parts.push({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,
+    s:4+Math.random()*6,c:cols[i%cols.length],r:Math.random()*6,vr:(Math.random()-.5)*.3,h:Math.random()<.25,life:0});
+  if(!raf) tick();
+}
+function tick(){
+  const d=devicePixelRatio;cx2.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life++;
+    cx2.save();cx2.translate(p.x*d,p.y*d);cx2.rotate(p.r);
+    if(p.h){cx2.font=(p.s*3*d)+'px serif';cx2.fillText('💖',0,0);}else{cx2.fillStyle=p.c;cx2.fillRect(-p.s*d/2,-p.s*d/4,p.s*d,p.s*d/2);}
+    cx2.restore();});
+  parts=parts.filter(p=>p.y<innerHeight+40&&p.life<300);
+  raf=parts.length?requestAnimationFrame(tick):(cx2.clearRect(0,0,cv.width,cv.height),null);
+}
+
+/* ---------- start ---------- */
+requestAnimationFrame(()=>{const r=stageRect();setCursor(r.left+r.width/2,r.top+r.height*0.78);});
+addEventListener('resize',()=>setCursor(cx,cy));
+scrIntro();
+</script>
+</body>
+</html>
