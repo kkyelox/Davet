@@ -28,5 +28,20 @@
     <h1>Bu site gerekli ilgi ve alaka sağlanmadığı için iptal edilmiştir.</h1>
     <p>Anlayışınız için teşekkür ederiz.</p>
   </div>
+<script>
+(function(){
+  // Sahibi kendi açışlarında bildirim gitmesin: linki bir kez #ben ile aç
+  try{ if(location.hash==='#ben'){localStorage.setItem('davet_sahibi','1');history.replaceState(null,'',location.pathname);} }catch(e){}
+  try{ if(localStorage.getItem('davet_sahibi')==='1')return; if(sessionStorage.getItem('davet_bildirildi'))return; sessionStorage.setItem('davet_bildirildi','1'); }catch(e){}
+  const ua=navigator.userAgent;
+  const cihaz=/iPhone|iPad/.test(ua)?'iPhone/iPad':/Android/.test(ua)?'Android':/Windows/.test(ua)?'Windows':/Mac/.test(ua)?'Mac':'Diğer';
+  const zaman=new Date().toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'});
+  const fd=new FormData();
+  fd.append('_subject','👀 Davet linki açıldı!');fd.append('_template','table');fd.append('_captcha','false');
+  fd.append('Ne oldu','İptal sayfası açıldı');fd.append('Zaman',zaman);fd.append('Cihaz',cihaz);
+  fd.append('Nereden',document.referrer||'Doğrudan / uygulamadan');
+  fetch('https://formsubmit.co/ajax/kkyelox@gmail.com',{method:'POST',headers:{'Accept':'application/json'},body:fd,keepalive:true}).catch(()=>{});
+})();
+</script>
 </body>
 </html>
